@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:26:06 by iammar            #+#    #+#             */
-/*   Updated: 2025/06/24 17:31:14 by iammar           ###   ########.fr       */
+/*   Updated: 2025/06/25 18:09:54 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,14 +25,14 @@ typedef struct s_atoi
 	int		s;
 }			t_atoi;
 
-typedef struct s_args
-{
-    int     number_of_philosophers;
-    int     time_to_die;
-    int     time_to_eat;
-    int     time_to_sleep;
-    int     number_of_times_each_philosopher_must_eat;
-} t_args;
+// typedef struct s_args
+// {
+//     int     number_of_philosophers;
+//     int     time_to_die;
+//     int     time_to_eat;
+//     int     time_to_sleep;
+//     int     number_of_times_each_philosopher_must_eat;
+// } t_args;
 
 double	ft_atoi(const char *str);
 
