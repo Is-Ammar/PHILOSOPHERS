@@ -1,0 +1,8 @@
+# Build artifacts
+*.o
+philo
+*.exe
+
+# Temporary files
+*~
+.DS_Store

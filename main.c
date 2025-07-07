@@ -27,6 +27,7 @@ t_philo *create_philosopher(int id, t_args *args)
     philo->time_to_sleep = args->time_to_sleep;
     philo->number_eat = args->number_of_times_each_philosopher_must_eat;
     philo->meals_eaten = 0;
+    philo->last_meal_time = get_current_time();
     philo->next = NULL;
     
     philo->args = args;
@@ -55,9 +56,52 @@ void set_on_table(t_philo **head, t_philo *philo)
 void *routine(void *philos)
 {
     t_philo *philo = (t_philo *)philos;
-    pthread_mutex_lock(&philo->args->mutex);
-    printf("%d  is eating\n", philo->id);
-    pthread_mutex_unlock(&philo->args->mutex);
+    
+    while (1)
+    {
+        pthread_mutex_lock(&philo->args->death_mutex);
+        if (philo->args->is_dead || philo->args->all_ate)
+        {
+            pthread_mutex_unlock(&philo->args->death_mutex);
+            break;
+        }
+        pthread_mutex_unlock(&philo->args->death_mutex);
+
+        // Eating
+        pthread_mutex_lock(&philo->args->mutex);
+        printf("%ld %d is eating\n", 
+            get_current_time() - philo->args->start_time, philo->id);
+        pthread_mutex_unlock(&philo->args->mutex);
+        
+        pthread_mutex_lock(&philo->args->meal_mutex);
+        philo->last_meal_time = get_current_time();
+        philo->meals_eaten++;
+        pthread_mutex_unlock(&philo->args->meal_mutex);
+        
+        usleep(philo->time_to_eat * 1000);
+
+        // Check if this philosopher has eaten enough
+        if (philo->number_eat > 0 && philo->meals_eaten >= philo->number_eat)
+        {
+            break;
+        }
+
+        // Sleeping
+        pthread_mutex_lock(&philo->args->mutex);
+        printf("%ld %d is sleeping\n", 
+            get_current_time() - philo->args->start_time, philo->id);
+        pthread_mutex_unlock(&philo->args->mutex);
+        
+        usleep(philo->time_to_sleep * 1000);
+
+        // Thinking
+        pthread_mutex_lock(&philo->args->mutex);
+        printf("%ld %d is thinking\n", 
+            get_current_time() - philo->args->start_time, philo->id);
+        pthread_mutex_unlock(&philo->args->mutex);
+        
+        usleep(1000);
+    }
     return NULL;
 }
 
@@ -65,7 +109,9 @@ int main(int ac, char **av)
 {
     t_philo *head = NULL;
     t_philo *philo;
+    t_philo *current;
     t_args args = {0};
+    pthread_t monitor_thread;
     int i = 1;
 
     if (ac < 5 || ac > 6)
@@ -81,20 +127,54 @@ int main(int ac, char **av)
         args.time_to_sleep = ft_atoi(av[4]);
         if (ac == 6)
             args.number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
+        else
+            args.number_of_times_each_philosopher_must_eat = -1;
     }
+    
+    args.is_dead = 0;
+    args.all_ate = 0;
+    args.start_time = get_current_time();
+    
+    pthread_mutex_init(&args.mutex, NULL);
+    pthread_mutex_init(&args.death_mutex, NULL);
+    pthread_mutex_init(&args.meal_mutex, NULL);
+    
     while(i <= args.number_of_philosophers)
     {
         philo = create_philosopher(i , &args);
         set_on_table(&head, philo);
         i++;
     }
-    pthread_mutex_init(&args.mutex, NULL);
-    while(head && i > 1)
+    
+    // Start all philosopher threads
+    current = head;
+    i = 0;
+    while(i < args.number_of_philosophers)
     {
-        pthread_create(&head->thread, NULL, routine, head);
-        pthread_join(head->thread, NULL);
-        i--;
-        head = head->next;
+        pthread_create(&current->thread, NULL, routine, current);
+        current = current->next;
+        i++;
     }
+    
+    // Start monitor thread
+    pthread_create(&monitor_thread, NULL, monitor, head);
+    
+    // Wait for monitor to finish
+    pthread_join(monitor_thread, NULL);
+    
+    // Wait for all philosopher threads to finish
+    current = head;
+    i = 0;
+    while(i < args.number_of_philosophers)
+    {
+        pthread_join(current->thread, NULL);
+        current = current->next;
+        i++;
+    }
+    
+    pthread_mutex_destroy(&args.mutex);
+    pthread_mutex_destroy(&args.death_mutex);
+    pthread_mutex_destroy(&args.meal_mutex);
+    
     return 0;
 }

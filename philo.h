@@ -43,6 +43,11 @@ typedef struct s_args
     int time_to_sleep;
     int number_of_times_each_philosopher_must_eat;
     pthread_mutex_t mutex;
+    pthread_mutex_t death_mutex;
+    pthread_mutex_t meal_mutex;
+    int is_dead;
+    int all_ate;
+    long start_time;
 } t_args;
 
 typedef struct s_philo
@@ -54,10 +59,15 @@ typedef struct s_philo
     int time_to_sleep;
     int number_eat;
     int meals_eaten;
+    long last_meal_time;
     t_args *args;
     struct s_philo *next;
 } t_philo;
 
 double	ft_atoi(const char *str);
+long	get_current_time(void);
+int		is_philosopher_dead(t_philo *philo);
+int		all_philosophers_ate(t_philo *head);
+void	*monitor(void *arg);
 
 #endif
