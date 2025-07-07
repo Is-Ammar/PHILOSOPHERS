@@ -12,10 +12,20 @@
 
 #ifndef PHILO_H 
 # define PHILO_H
-# include <stdio.h>
-# include <sys/time.h>
-# include <pthread.h>
-# include <unistd.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/time.h>
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 typedef struct s_atoi
 {
@@ -25,14 +35,28 @@ typedef struct s_atoi
 	int		s;
 }			t_atoi;
 
-// typedef struct s_args
-// {
-//     int     number_of_philosophers;
-//     int     time_to_die;
-//     int     time_to_eat;
-//     int     time_to_sleep;
-//     int     number_of_times_each_philosopher_must_eat;
-// } t_args;
+typedef struct s_args
+{
+    int number_of_philosophers;
+    int time_to_die;
+    int time_to_eat;
+    int time_to_sleep;
+    int number_of_times_each_philosopher_must_eat;
+    pthread_mutex_t mutex;
+} t_args;
+
+typedef struct s_philo
+{
+    pthread_t thread;
+    int id;
+    int time_to_die;
+    int time_to_eat;
+    int time_to_sleep;
+    int number_eat;
+    int meals_eaten;
+    t_args *args;
+    struct s_philo *next;
+} t_philo;
 
 double	ft_atoi(const char *str);
 
