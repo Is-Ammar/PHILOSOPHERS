@@ -5,54 +5,56 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/07 21:13:21 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/07 22:34:36 by iammar           ###   ########.fr       */
+/*   Created: 2025/07/08 02:45:14 by iammar            #+#    #+#             */
+/*   Updated: 2025/07/08 03:00:43 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long long get_timestamp()
+void *routine(void *philos)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
+    t_philo *philo = (t_philo *)philos;
 
-void *monitoring(void *arg)
-{
-    t_args *args = (t_args *)arg;
-    t_philo *current;
-    int i;
-    long long current_time;
-    while (args->simulation_running)
+    philo->last_meal_time = get_timestamp();
+    
+    if (philo->id % 2 == 0)
+        usleep(1000);
+    while(philo->args->simulation_running)
     {
-        current = args->philosophers_head;
-        i = 0;
-        
-        while (i < args->number_of_philosophers && args->simulation_running)
+        if (!philo->args->simulation_running || philo->args->all_ate)
+            break;
+        if((philo->id % 2) == 1)
         {
-            current_time = get_timestamp();
-            pthread_mutex_lock(&args->mutex);
-            if ((current_time - current->last_meal_time) > current->time_to_die)
-            {
-                pthread_mutex_lock(&args->print_mutex);
-                printf("%lld %d died\n", current_time - args->start_time, current->id);
-                args->simulation_running = 0;
-                pthread_mutex_unlock(&args->print_mutex);
-            }
-            pthread_mutex_unlock(&args->mutex);
-            if (all_philosophers_ate(args->philosophers_head, args->number_of_philosophers))
-            {
-                pthread_mutex_lock(&args->mutex);
-                args->all_ate = 1;
-                args->simulation_running = 0;
-                pthread_mutex_unlock(&args->mutex);
-            }
-            
-            current = current->next;
-            i++;
+            pthread_mutex_lock(&philo->fork);
+            safe_print(philo, "has taken a fork");
+            pthread_mutex_lock(&philo->next->fork);
+            safe_print(philo, "has taken a fork");
         }
+        else
+        {
+            pthread_mutex_lock(&philo->next->fork);
+            safe_print(philo, "has taken a fork");
+            pthread_mutex_lock(&philo->fork);
+            safe_print(philo, "has taken a fork");
+        }
+        pthread_mutex_lock(&philo->args->mutex);
+        philo->last_meal_time = get_timestamp();
+        philo->meals_eaten++;
+        pthread_mutex_unlock(&philo->args->mutex);
+        
+        safe_print(philo, "is eating");
+        usleep(philo->time_to_eat * 1000);
+        
+        pthread_mutex_unlock(&philo->fork);
+        pthread_mutex_unlock(&philo->next->fork);
+        
+        safe_print(philo, "is sleeping");
+        usleep(philo->time_to_sleep * 1000);
+        
+        safe_print(philo, "is thinking");
+        if(philo->args->number_of_philosophers % 2 && philo->time_to_eat <= philo->time_to_sleep)
+            usleep(philo->time_to_eat * 1000);
     }
     return NULL;
 }

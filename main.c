@@ -6,59 +6,18 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:25:47 by iammar            #+#    #+#             */
-/*   Updated: 2025/06/25 18:37:40 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/08 02:47:15 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-
-t_philo *create_philosopher(int id, t_args *args)
+void safe_print(t_philo *philo, char *message)
 {
-    t_philo *philo;
-    
-    philo = malloc(sizeof(t_philo));
-    if (!philo)
-        return NULL;
-    
-    philo->id = id;
-    philo->time_to_die = args->time_to_die;
-    philo->time_to_eat = args->time_to_eat;
-    philo->time_to_sleep = args->time_to_sleep;
-    philo->number_eat = args->number_of_times_each_philosopher_must_eat;
-    philo->meals_eaten = 0;
-    philo->next = NULL;
-    
-    philo->args = args;
-    return philo;
-}
-
-void set_on_table(t_philo **head, t_philo *philo)
-{
-    t_philo *curr;
-
-    if (!*head)
-    {
-        *head = philo;
-        (*head)->next = *head;
-        return;
-    }
-    
-    curr = *head;
-    while (curr->next != *head)
-        curr = curr->next;
-    
-    curr->next = philo;
-    philo->next = *head;
-}
-
-void *routine(void *philos)
-{
-    t_philo *philo = (t_philo *)philos;
-    pthread_mutex_lock(&philo->args->mutex);
-    printf("%d  is eating\n", philo->id);
-    pthread_mutex_unlock(&philo->args->mutex);
-    return NULL;
+    pthread_mutex_lock(&philo->args->print_mutex);
+    if (philo->args->simulation_running)
+        printf("%lld %d %s\n", get_timestamp() - philo->args->start_time, philo->id, message);
+    pthread_mutex_unlock(&philo->args->print_mutex);
 }
 
 int main(int ac, char **av)
@@ -67,6 +26,8 @@ int main(int ac, char **av)
     t_philo *philo;
     t_args args = {0};
     int i = 1;
+    pthread_t monitor_thread;
+    t_philo *current;
 
     if (ac < 5 || ac > 6)
     {
@@ -81,20 +42,40 @@ int main(int ac, char **av)
         args.time_to_sleep = ft_atoi(av[4]);
         if (ac == 6)
             args.number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
+        else
+            args.number_of_times_each_philosopher_must_eat = -1;
     }
+    args.all_ate = 0;
+    args.simulation_running = 1;
+    args.start_time = get_timestamp();
+    pthread_mutex_init(&args.mutex, NULL);
+    pthread_mutex_init(&args.print_mutex, NULL);
+    
     while(i <= args.number_of_philosophers)
     {
-        philo = create_philosopher(i , &args);
+        philo = create_philosopher(i, &args);
         set_on_table(&head, philo);
         i++;
     }
-    pthread_mutex_init(&args.mutex, NULL);
-    while(head && i > 1)
+    args.philosophers_head = head;
+    current = head;
+    i = args.number_of_philosophers;
+    while(i > 0)
     {
-        pthread_create(&head->thread, NULL, routine, head);
-        pthread_join(head->thread, NULL);
+        pthread_create(&current->thread, NULL, routine, current);
+        current = current->next;
         i--;
-        head = head->next;
     }
+    pthread_create(&monitor_thread, NULL, monitor, &args);
+    current = head;
+    i = args.number_of_philosophers;
+    while(i > 0)
+    {
+        pthread_join(current->thread, NULL);
+        current = current->next;
+        i--;
+    }
+    pthread_join(monitor_thread, NULL);
+    
     return 0;
 }

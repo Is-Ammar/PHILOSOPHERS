@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
 NAME = philo
-SRC = main.c helpers.c
+SRC = main.c helpers.c init.c routine.c monitor.c
 OBJ=$(SRC:%.c=%.o)
 %.o: %.c
 	${CC} ${CFLAGS} -c $< -o $@
