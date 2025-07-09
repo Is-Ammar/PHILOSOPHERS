@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 02:43:39 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/08 09:58:24 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/09 23:23:05 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,17 @@ int all_philosophers_ate(t_philo *head, int total_philos)
     t_philo *current = head;
     int count = 0;
     int i = 0;
+    int current_meals;
     
     if (head->args->number_of_times_each_philosopher_must_eat <= 0)
         return 0;
     while (i < total_philos)
     {
-        if (current->meals_eaten >= current->args->number_of_times_each_philosopher_must_eat)
+        pthread_mutex_lock(&current->args->mutex);
+        current_meals = current->meals_eaten;
+        pthread_mutex_unlock(&current->args->mutex);
+        
+        if (current_meals >= current->args->number_of_times_each_philosopher_must_eat)
             count++;
         current = current->next;
         i++;
@@ -58,9 +63,12 @@ void *monitor(void *arg)
             {
                 pthread_mutex_lock(&args->print_mutex);
                 printf("%lld %d died\n", current_time - args->start_time, current->id);
-                args->simulation_running = 0;
                 pthread_mutex_unlock(&args->print_mutex);
+                pthread_mutex_lock(&args->lock);
+                args->simulation_running = 0;
+                pthread_mutex_unlock(&args->lock);
                 pthread_mutex_unlock(&args->mutex);
+                pthread_mutex_unlock(&args->second);
                 return NULL;
             }
             pthread_mutex_unlock(&args->mutex);
@@ -68,17 +76,19 @@ void *monitor(void *arg)
                 all_philosophers_ate(args->philosophers_head, args->number_of_philosophers))
             {
                 pthread_mutex_lock(&args->mutex);
+                pthread_mutex_lock(&args->lock);
                 args->all_ate = 1;
                 args->simulation_running = 0;
                 pthread_mutex_unlock(&args->mutex);
+                pthread_mutex_unlock(&args->lock);
+                pthread_mutex_unlock(&args->second);
+                
                 return NULL;
             }
-            
             current = current->next;
             i++;
         }
         pthread_mutex_unlock(&args->second);
-
     }
     return NULL;
 }

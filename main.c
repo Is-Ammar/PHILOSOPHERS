@@ -6,17 +6,24 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:25:47 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/08 02:47:15 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/09 22:47:36 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void safe_print(t_philo *philo, char *message)
+void print(t_philo *philo, char *message)
 {
+    long long current_time;
+    
     pthread_mutex_lock(&philo->args->print_mutex);
+    pthread_mutex_lock(&philo->args->lock);
     if (philo->args->simulation_running)
-        printf("%lld %d %s\n", get_timestamp() - philo->args->start_time, philo->id, message);
+    {
+        current_time = get_timestamp();
+        printf("%lld %d %s\n", current_time - philo->args->start_time, philo->id, message);
+    }
+    pthread_mutex_unlock(&philo->args->lock);
     pthread_mutex_unlock(&philo->args->print_mutex);
 }
 
@@ -50,6 +57,7 @@ int main(int ac, char **av)
     args.start_time = get_timestamp();
     pthread_mutex_init(&args.mutex, NULL);
     pthread_mutex_init(&args.print_mutex, NULL);
+    pthread_mutex_init(&args.lock, NULL);
     
     while(i <= args.number_of_philosophers)
     {

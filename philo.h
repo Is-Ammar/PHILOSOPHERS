@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:26:06 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/08 09:58:14 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/09 22:24:55 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ typedef struct s_args
     pthread_mutex_t print_mutex;
     pthread_mutex_t second;
     pthread_mutex_t mutex;
+    pthread_mutex_t lock;
 } t_args;
 
 typedef struct s_philo
@@ -75,6 +76,6 @@ long long get_timestamp();
 void *routine(void *philos);
 t_philo *create_philosopher(int id, t_args *args);
 void set_on_table(t_philo **head, t_philo *philo);
-void safe_print(t_philo *philo, char *message);
+void print(t_philo *philo, char *message);
 
 #endif
