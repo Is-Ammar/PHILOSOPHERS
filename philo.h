@@ -72,6 +72,8 @@ typedef struct s_philo
 
 double	ft_atoi(const char *str);
 void *monitor(void *arg);
+void *check_philosopher_death(t_args *args, t_philo *current, long long current_time);
+void *check_all_philosophers_ate(t_args *args);
 long long get_timestamp();
 void *routine(void *philos);
 t_philo *create_philosopher(int id, t_args *args);
