@@ -6,26 +6,25 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:26:06 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/09 22:24:55 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/17 05:05:20 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H 
 # define PHILO_H
-#include <stdlib.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/time.h>
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
+typedef enum s_macros
+{
+   ALIVE,
+   DEAD,
+   FINISHED,
+   CONTINUE,
+}t_macros;
 
 typedef struct s_atoi
 {
@@ -50,6 +49,8 @@ typedef struct s_args
     t_philo *philosophers_head;
     pthread_mutex_t print_mutex;
     pthread_mutex_t second;
+    int             can_start;
+    pthread_mutex_t start_mutex; 
     pthread_mutex_t mutex;
     pthread_mutex_t lock;
 } t_args;
@@ -66,6 +67,7 @@ typedef struct s_philo
     long long last_meal_time;
     int is_dead;
     pthread_mutex_t fork;
+    int has_eaten_enough;;
     t_args *args;
     struct s_philo *next;
 } t_philo;

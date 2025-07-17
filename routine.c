@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 02:45:14 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/09 22:37:02 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/17 06:33:30 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,25 @@
 void *routine(void *philos)
 {
     t_philo *philo = (t_philo *)philos;
+    int can_start = 0;
+
+    while (!can_start)
+    {
+        pthread_mutex_lock(&philo->args->lock);
+        can_start = philo->args->simulation_running;
+        pthread_mutex_unlock(&philo->args->lock);
+        if (!can_start)
+            usleep(20);
+    }
     pthread_mutex_lock(&philo->args->mutex);
     philo->last_meal_time = get_timestamp();
     pthread_mutex_unlock(&philo->args->mutex);
+    
     if (philo->id % 2 == 0)
         usleep(philo->time_to_eat * 1000);
     
     while (1337)
-        {
+    {
         pthread_mutex_lock(&philo->args->lock);
         if (!philo->args->simulation_running || philo->args->all_ate)
         {
@@ -46,19 +57,14 @@ void *routine(void *philos)
         }
         print(philo, "is eating");
         usleep(philo->time_to_eat * 1000);
-        
         pthread_mutex_lock(&philo->args->mutex);
         philo->last_meal_time = get_timestamp();
         philo->meals_eaten++;
         pthread_mutex_unlock(&philo->args->mutex);
-        
-        
         pthread_mutex_unlock(&philo->fork);
         pthread_mutex_unlock(&philo->next->fork);
-        
         print(philo, "is sleeping");
         usleep(philo->time_to_sleep * 1000);
-        
         print(philo, "is thinking");
         if (philo->args->number_of_philosophers % 2 != 0 && 
             philo->time_to_eat >= philo->time_to_sleep)

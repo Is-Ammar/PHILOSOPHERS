@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 02:43:39 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/09 23:23:05 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/17 06:37:54 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,46 @@ long long get_timestamp()
     return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
+int check_death(t_args *args, t_philo *current)
+{
+    long long current_time;
+    current_time = get_timestamp();
+    if ((current_time - current->last_meal_time) >= current->time_to_die)
+    {
+        pthread_mutex_lock(&args->print_mutex);
+        printf("%lld %d died\n", current_time - args->start_time, current->id);
+        pthread_mutex_unlock(&args->print_mutex);
+        pthread_mutex_lock(&args->lock);
+        args->simulation_running = 0;
+        pthread_mutex_unlock(&args->lock);
+        pthread_mutex_unlock(&args->mutex);
+        pthread_mutex_unlock(&args->second);
+        return DEAD;
+    }
+    return(ALIVE);
+}
+int check_finished(t_args *args)
+{
+    if (args->number_of_times_each_philosopher_must_eat > 0 && 
+        all_philosophers_ate(args->philosophers_head, args->number_of_philosophers))
+    {
+        pthread_mutex_lock(&args->mutex);
+        pthread_mutex_lock(&args->lock);
+        args->all_ate = 1;
+        args->simulation_running = 0;
+        pthread_mutex_unlock(&args->mutex);
+        pthread_mutex_unlock(&args->lock);
+        pthread_mutex_unlock(&args->second);
+        return FINISHED;
+    }
+    return CONTINUE;
+}
+
 void *monitor(void *arg)
 {
     t_args *args = (t_args *)arg;
     t_philo *current;
     int i;
-    long long current_time;
     
     while (args->simulation_running)
     {
@@ -55,36 +89,14 @@ void *monitor(void *arg)
         i = 0;
         
         pthread_mutex_lock(&args->second);
-        while (i < args->number_of_philosophers && args->simulation_running)
+        while (i <= args->number_of_philosophers && args->simulation_running)
         {
-            current_time = get_timestamp();
             pthread_mutex_lock(&args->mutex);
-            if ((current_time - current->last_meal_time) >= current->time_to_die)
-            {
-                pthread_mutex_lock(&args->print_mutex);
-                printf("%lld %d died\n", current_time - args->start_time, current->id);
-                pthread_mutex_unlock(&args->print_mutex);
-                pthread_mutex_lock(&args->lock);
-                args->simulation_running = 0;
-                pthread_mutex_unlock(&args->lock);
-                pthread_mutex_unlock(&args->mutex);
-                pthread_mutex_unlock(&args->second);
+            if(check_death(args, current) == DEAD)
                 return NULL;
-            }
             pthread_mutex_unlock(&args->mutex);
-            if (args->number_of_times_each_philosopher_must_eat > 0 && 
-                all_philosophers_ate(args->philosophers_head, args->number_of_philosophers))
-            {
-                pthread_mutex_lock(&args->mutex);
-                pthread_mutex_lock(&args->lock);
-                args->all_ate = 1;
-                args->simulation_running = 0;
-                pthread_mutex_unlock(&args->mutex);
-                pthread_mutex_unlock(&args->lock);
-                pthread_mutex_unlock(&args->second);
-                
+            if (check_finished(args) == FINISHED)
                 return NULL;
-            }
             current = current->next;
             i++;
         }
