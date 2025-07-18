@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:25:47 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/17 14:29:19 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/18 01:03:37 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	create(t_philo *philo, t_philo *head, t_args *args)
 	int		i;
 
 	i = 1;
-	while (i < args->number_of_philosophers)
+	while (i <= args->number_of_philosophers)
 	{
 		philo = create_philosopher(i, args);
 		set_on_table(&head, philo);

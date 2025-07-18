@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 02:45:14 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/17 17:11:19 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/18 01:01:50 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	get_ready(t_philo *philo)
 	pthread_mutex_lock(&philo->args->mutex);
 	philo->last_meal_time = get_timestamp();
 	pthread_mutex_unlock(&philo->args->mutex);
-	if (philo->id % 2 == 0 || philo->id == philo->args->number_of_philosophers)
+	if (philo->id % 2 == 0)
 		usleep(philo->time_to_eat * 1000 / 2);
 }
 
