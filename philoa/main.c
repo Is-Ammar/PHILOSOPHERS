@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:25:47 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/18 01:03:37 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/18 02:13:45 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	parse(t_args *args, int ac, char **av)
 	if (ac < 5 || ac > 6)
 	{
 		write(2, "invalid arguments\n", 18);
-		exit(1);
+		exit(1);// forbiden
 	}
 	else
 	{

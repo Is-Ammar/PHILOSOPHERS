@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 02:43:39 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/17 14:23:59 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/18 11:48:59 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void	*monitor(void *arg)
 	int		i;
 
 	args = (t_args *)arg;
-	while (args->simulation_running)
+	while (1337)
 	{
 		current = args->philosophers_head;
 		i = 0;
@@ -99,10 +99,10 @@ void	*monitor(void *arg)
 		{
 			pthread_mutex_lock(&args->mutex);
 			if (check_death(args, current) == DEAD)
-				return (NULL);
+				return NULL;
 			pthread_mutex_unlock(&args->mutex);
 			if (check_finished(args) == FINISHED)
-				return (NULL);
+				return NULL;
 			current = current->next;
 			i++;
 		}
