@@ -6,7 +6,7 @@
 /*   By: iammar <iammar@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 02:43:39 by iammar            #+#    #+#             */
-/*   Updated: 2025/07/18 11:48:59 by iammar           ###   ########.fr       */
+/*   Updated: 2025/07/21 20:29:38 by iammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ void	*monitor(void *arg)
 			i++;
 		}
 		pthread_mutex_unlock(&args->second);
+		usleep(500);
 	}
 	return (NULL);
 }
