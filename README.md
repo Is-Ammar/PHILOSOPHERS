@@ -53,28 +53,28 @@ Make sure you're in the `philo` directory and run:
 ```
 
 make
-
+```
 This will create an executable called philo.
 
 To clean the build:
 
-
+```
 make clean
-
+```
 To remove all built files:
-
+```
 make fclean
-
+```
 To recompile from scratch:
-
+```
 make re
-
+```
 ▶️ Running the Program
-
+```
 ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]
-
+```
 Parameters
-
+```
 number_of_philosophers: Number of philosophers (and forks)
 
 time_to_die: Time (in ms) before a philosopher dies if they don't start eating
@@ -84,9 +84,9 @@ time_to_eat: Time (in ms) a philosopher spends eating
 time_to_sleep: Time (in ms) a philosopher spends sleeping
 
 number_of_times_each_philosopher_must_eat (optional): If set, the simulation stops when all philosophers have eaten at least this many times
-
+```
 Example
-
+```
 ./philo 5 800 200 200 3
 
 Simulates:
